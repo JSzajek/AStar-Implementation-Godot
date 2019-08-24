@@ -23,3 +23,10 @@ The main scence demonstrates these key features within only a few steps. First b
 #### Included ####
 * Primary Scripts, Assets, Scenes, and .project
 * Executable Project File
+
+
+#### Example Baking ####
+![alt text](https://github.com/JSzajek/AStar-Implementation-Godot/blob/master/example_imgs/Baking_Example.png)
+
+#### Example Pathing ####
+![alt text](https://github.com/JSzajek/AStar-Implementation-Godot/blob/master/example_imgs/Pathing_Example.png)
