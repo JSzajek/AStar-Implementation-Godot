@@ -11,8 +11,8 @@ This was done in an attempt to improve upon the current Godot game engine's 3d p
 * Gradient Slowdown - 'natural' slow down when approaching target
 
 ### Task List: ###
-[ ] Improve Naive Binary Heap Implementation
-[ ] Decrease 'jitter' in pathing
-[ ] Fix being caught on obstacles
-[ ] Increased favoring for weights
-[ ] Fix slowdown after close distance
+- [ ] Improve Naive Binary Heap Implementation
+- [ ] Decrease 'jitter' in pathing
+- [ ] Fix being caught on obstacles
+- [ ] Increased favoring for weights
+- [ ] Fix slowdown after close distance
