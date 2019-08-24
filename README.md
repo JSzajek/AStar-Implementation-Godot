@@ -19,3 +19,7 @@ This was done in an attempt to improve upon the current Godot game engine's 3d p
 
 #### Detailed Description ####
 The main scence demonstrates these key features within only a few steps. First being the baking of the grid-node map with any user set parameters, which then displays its bake-time. Second spawning in as many "seekers/trackers" into the scene that will track the target which is represented by the red dot. Target can be moved around the scene by clicking any valid position. 
+
+#### Included ####
+* Primary Scripts, Assets, Scenes, and .project
+* Executable Project File
