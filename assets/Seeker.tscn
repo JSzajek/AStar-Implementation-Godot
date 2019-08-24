@@ -1,0 +1,41 @@
+[gd_scene load_steps=7 format=2]
+
+[ext_resource path="res://scripts/Seeker.gd" type="Script" id=1]
+
+[sub_resource type="SphereShape" id=1]
+radius = 2.0
+
+[sub_resource type="SphereMesh" id=2]
+
+[sub_resource type="SpatialMaterial" id=3]
+albedo_color = Color( 0, 1, 0.952941, 1 )
+
+[sub_resource type="PrismMesh" id=4]
+size = Vector3( 1.5, 1, 0.25 )
+
+[sub_resource type="SpatialMaterial" id=5]
+albedo_color = Color( 0.643137, 0.643137, 0.643137, 1 )
+
+[node name="Seeker" type="KinematicBody" groups=[
+"seekers",
+]]
+script = ExtResource( 1 )
+move_speed = 4.0
+stopping_distance = 3.0
+
+[node name="CollisionShape" type="CollisionShape" parent="."]
+shape = SubResource( 1 )
+
+[node name="Body" type="MeshInstance" parent="."]
+mesh = SubResource( 2 )
+material/0 = SubResource( 3 )
+
+[node name="Direction_Indicator" type="MeshInstance" parent="Body"]
+transform = Transform( 1, 0, 0, 0, -4.37114e-008, 1, 0, -1, -4.37114e-008, 0, 0, -1 )
+mesh = SubResource( 4 )
+material/0 = SubResource( 5 )
+
+[node name="Point_Debug" type="ImmediateGeometry" parent="."]
+transform = Transform( -4.37114e-008, 0, -1, 0, 1, 0, 1, 0, -4.37114e-008, 0, 0, 0 )
+
+[node name="Path_Debug" type="ImmediateGeometry" parent="."]

@@ -1,0 +1,412 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://scripts/Canvas.gd" type="Script" id=1]
+
+[sub_resource type="StyleBoxFlat" id=6]
+bg_color = Color( 0.686275, 0.686275, 0.686275, 1 )
+border_width_left = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color( 0.294118, 0.294118, 0.294118, 1 )
+
+[sub_resource type="StyleBoxFlat" id=2]
+bg_color = Color( 0.52549, 0.521569, 0.521569, 1 )
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color( 0.294118, 0.294118, 0.294118, 1 )
+
+[sub_resource type="StyleBoxFlat" id=3]
+bg_color = Color( 0.188235, 0.188235, 0.188235, 0.294118 )
+
+[sub_resource type="StyleBoxFlat" id=5]
+bg_color = Color( 0.52549, 0.521569, 0.521569, 1 )
+border_width_left = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color( 0.294118, 0.294118, 0.294118, 1 )
+
+[node name="Canvas" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource( 1 )
+
+[node name="Label" type="Label" parent="."]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -70.5
+margin_top = 15.0
+margin_right = 89.5
+margin_bottom = 31.0
+rect_scale = Vector2( 3, 3 )
+rect_pivot_offset = Vector2( 80, 0 )
+text = "AStar Pathfinding"
+align = 1
+valign = 1
+
+[node name="Bake_Time" type="Label" parent="."]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -83.5
+margin_top = 50.71
+margin_right = 83.5
+margin_bottom = 80.7101
+text = "Bake Time : --"
+align = 1
+valign = 1
+
+[node name="Parameters" type="ColorRect" parent="."]
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = -249.0
+margin_right = 0.998535
+rect_pivot_offset = Vector2( 0, 300 )
+color = Color( 0.482353, 0.482353, 0.482353, 0.392157 )
+
+[node name="Parameter_Button" type="Button" parent="Parameters"]
+anchor_top = 0.5
+anchor_bottom = 0.5
+margin_top = -20.0
+margin_right = 20.0
+margin_bottom = 20.0
+focus_mode = 0
+custom_styles/hover = SubResource( 6 )
+custom_styles/normal = SubResource( 2 )
+enabled_focus_mode = 0
+text = ">"
+
+[node name="Display" type="Control" parent="Parameters"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+[node name="Label" type="Label" parent="Parameters/Display"]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -127.0
+margin_top = 10.0
+margin_right = 143.0
+margin_bottom = 40.0
+text = "Map Parameters"
+align = 1
+valign = 1
+
+[node name="Visualize_Grid" type="Panel" parent="Parameters/Display"]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -105.0
+margin_top = 50.0
+margin_right = 105.0
+margin_bottom = 90.0
+custom_styles/panel = SubResource( 3 )
+
+[node name="Label" type="Label" parent="Parameters/Display/Visualize_Grid"]
+anchor_top = 0.5
+anchor_bottom = 0.5
+margin_left = 10.0
+margin_top = -7.0
+margin_right = 150.0
+margin_bottom = 7.0
+text = "Visualize Grid"
+valign = 1
+
+[node name="Visualize_Grid_CheckBox" type="CheckBox" parent="Parameters/Display/Visualize_Grid"]
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+margin_left = -30.0
+margin_top = -12.0
+margin_right = -6.0
+margin_bottom = 12.0
+focus_mode = 0
+pressed = true
+enabled_focus_mode = 0
+
+[node name="Node_Size" type="Panel" parent="Parameters/Display"]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -105.0
+margin_top = 100.0
+margin_right = 105.0
+margin_bottom = 140.0
+custom_styles/panel = SubResource( 3 )
+
+[node name="Label" type="Label" parent="Parameters/Display/Node_Size"]
+anchor_top = 0.5
+anchor_bottom = 0.5
+margin_left = 10.0
+margin_top = -7.0
+margin_right = 150.0
+margin_bottom = 7.0
+text = "Node Radius"
+valign = 1
+
+[node name="LineEdit" type="LineEdit" parent="Parameters/Display/Node_Size"]
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+margin_left = -62.0
+margin_top = -12.0
+margin_right = -4.0
+margin_bottom = 12.0
+text = "1.0"
+align = 1
+context_menu_enabled = false
+
+[node name="Weights_Control" type="Panel" parent="Parameters/Display"]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -105.0
+margin_top = 150.0
+margin_right = 105.0
+margin_bottom = 190.0
+custom_styles/panel = SubResource( 3 )
+
+[node name="Label" type="Label" parent="Parameters/Display/Weights_Control"]
+anchor_top = 0.5
+anchor_bottom = 0.5
+margin_left = 10.0
+margin_top = -7.0
+margin_right = 150.0
+margin_bottom = 7.0
+text = "Blurr Weights"
+valign = 1
+
+[node name="CheckBox" type="CheckBox" parent="Parameters/Display/Weights_Control"]
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+margin_left = -30.0
+margin_top = -12.0
+margin_right = -6.0
+margin_bottom = 12.0
+focus_mode = 0
+pressed = true
+enabled_focus_mode = 0
+
+[node name="Kernel_Size" type="Panel" parent="Parameters/Display"]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -105.0
+margin_top = 200.0
+margin_right = 105.0
+margin_bottom = 240.0
+custom_styles/panel = SubResource( 3 )
+
+[node name="Label" type="Label" parent="Parameters/Display/Kernel_Size"]
+anchor_top = 0.5
+anchor_bottom = 0.5
+margin_left = 10.0
+margin_top = -7.0
+margin_right = 150.0
+margin_bottom = 7.0
+text = "Kernel Size"
+valign = 1
+
+[node name="LineEdit" type="LineEdit" parent="Parameters/Display/Kernel_Size"]
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+margin_left = -62.0
+margin_top = -12.0
+margin_right = -4.0
+margin_bottom = 12.0
+text = "1"
+align = 1
+max_length = 1
+context_menu_enabled = false
+
+[node name="Bake_Button" type="Button" parent="Parameters/Display"]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -85.0
+margin_top = 250.0
+margin_right = 85.0
+margin_bottom = 280.0
+focus_mode = 0
+enabled_focus_mode = 0
+text = "Bake Navigation Grid"
+
+[node name="Label2" type="Label" parent="Parameters/Display"]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -137.0
+margin_top = 320.0
+margin_right = 133.0
+margin_bottom = 350.0
+text = "Seekers Parameters"
+align = 1
+valign = 1
+
+[node name="Spawn_Seeker" type="Button" parent="Parameters/Display"]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -85.0
+margin_top = 360.0
+margin_right = 85.0
+margin_bottom = 390.0
+disabled = true
+enabled_focus_mode = 0
+text = "Spawn Seeker"
+
+[node name="Clear_Seekers" type="Button" parent="Parameters/Display"]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -85.0
+margin_top = 405.0
+margin_right = 85.0
+margin_bottom = 435.0
+disabled = true
+enabled_focus_mode = 0
+text = "Clear Seekers"
+
+[node name="Visualize_Path" type="Panel" parent="Parameters/Display"]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -105.0
+margin_top = 445.0
+margin_right = 105.0
+margin_bottom = 485.0
+custom_styles/panel = SubResource( 3 )
+
+[node name="Label" type="Label" parent="Parameters/Display/Visualize_Path"]
+anchor_top = 0.5
+anchor_bottom = 0.5
+margin_left = 10.0
+margin_top = -7.0
+margin_right = 150.0
+margin_bottom = 7.0
+text = "Visualize Path"
+valign = 1
+
+[node name="Visualize_Path_CheckBox" type="CheckBox" parent="Parameters/Display/Visualize_Path"]
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+margin_left = -30.0
+margin_top = -12.0
+margin_right = -6.0
+margin_bottom = 12.0
+enabled_focus_mode = 0
+
+[node name="Track_Button" type="Button" parent="Parameters/Display"]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -85.0
+margin_top = 495.0
+margin_right = 85.0
+margin_bottom = 525.0
+disabled = true
+enabled_focus_mode = 0
+text = "Start Tracking"
+
+[node name="Navigation" type="ColorRect" parent="."]
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+margin_left = -175.0
+margin_top = -120.0
+margin_right = 175.0
+margin_bottom = 0.000183105
+color = Color( 0.482353, 0.482353, 0.482353, 0.392157 )
+
+[node name="Navigation_Button" type="Button" parent="Navigation"]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -50.0
+margin_right = 50.0
+margin_bottom = 20.0
+focus_mode = 0
+custom_styles/hover = SubResource( 6 )
+custom_styles/normal = SubResource( 5 )
+enabled_focus_mode = 0
+text = "v"
+
+[node name="Display" type="Control" parent="Navigation"]
+editor/display_folded = true
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+[node name="Down_Rotation" type="Button" parent="Navigation/Display"]
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+margin_left = -50.0
+margin_top = -40.0
+margin_right = 50.0
+margin_bottom = -10.0
+focus_mode = 0
+enabled_focus_mode = 0
+text = "v"
+
+[node name="Up_Rotation" type="Button" parent="Navigation/Display"]
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+margin_left = -50.0
+margin_top = -70.0
+margin_right = 50.0
+margin_bottom = -40.0
+focus_mode = 0
+enabled_focus_mode = 0
+text = "^"
+
+[node name="Right_Rotation" type="Button" parent="Navigation/Display"]
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+margin_left = 50.0
+margin_top = -70.0
+margin_right = 115.0
+margin_bottom = -10.0
+focus_mode = 0
+enabled_focus_mode = 0
+text = ">"
+
+[node name="Left_Rotation" type="Button" parent="Navigation/Display"]
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+margin_left = -115.0
+margin_top = -70.0
+margin_right = -50.0
+margin_bottom = -10.0
+focus_mode = 0
+enabled_focus_mode = 0
+text = "<"
+
+[node name="Label" type="Label" parent="Navigation/Display"]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -115.0
+margin_top = 27.0
+margin_right = 115.0
+margin_bottom = 41.0
+text = "Navigation"
+align = 1
+valign = 1
+[connection signal="pressed" from="Parameters/Parameter_Button" to="." method="_on_Parameter_Button_pressed"]
+[connection signal="pressed" from="Parameters/Display/Visualize_Grid/Visualize_Grid_CheckBox" to="." method="_on_Visualize_Grid_CheckBox_pressed"]
+[connection signal="pressed" from="Parameters/Display/Bake_Button" to="." method="_on_Bake_Button_pressed"]
+[connection signal="pressed" from="Parameters/Display/Spawn_Seeker" to="." method="_on_Spawn_Seeker_pressed"]
+[connection signal="pressed" from="Parameters/Display/Clear_Seekers" to="." method="_on_Clear_Seekers_pressed"]
+[connection signal="pressed" from="Parameters/Display/Visualize_Path/Visualize_Path_CheckBox" to="." method="_on_Visualize_Path_CheckBox_pressed"]
+[connection signal="pressed" from="Parameters/Display/Track_Button" to="." method="_on_Track_Button_pressed"]
+[connection signal="pressed" from="Navigation/Navigation_Button" to="." method="_on_Navigation_Button_pressed"]
+[connection signal="pressed" from="Navigation/Display/Down_Rotation" to="." method="_on_Down_Rotation_pressed"]
+[connection signal="pressed" from="Navigation/Display/Up_Rotation" to="." method="_on_Up_Rotation_pressed"]
+[connection signal="pressed" from="Navigation/Display/Right_Rotation" to="." method="_on_Right_Rotation_pressed"]
+[connection signal="pressed" from="Navigation/Display/Left_Rotation" to="." method="_on_Left_Rotation_pressed"]
