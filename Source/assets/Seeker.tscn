@@ -16,9 +16,7 @@ size = Vector3( 1.5, 1, 0.25 )
 [sub_resource type="SpatialMaterial" id=5]
 albedo_color = Color( 0.643137, 0.643137, 0.643137, 1 )
 
-[node name="Seeker" type="KinematicBody" groups=[
-"seekers",
-]]
+[node name="Seeker" type="KinematicBody"]
 script = ExtResource( 1 )
 move_speed = 4.0
 stopping_distance = 3.0
@@ -39,3 +37,6 @@ material/0 = SubResource( 5 )
 transform = Transform( -4.37114e-008, 0, -1, 0, 1, 0, 1, 0, -4.37114e-008, 0, 0, 0 )
 
 [node name="Path_Debug" type="ImmediateGeometry" parent="."]
+
+[node name="Path_Update_Timer" type="Timer" parent="."]
+[connection signal="timeout" from="Path_Update_Timer" to="." method="_on_Path_Update_Timer_timeout"]

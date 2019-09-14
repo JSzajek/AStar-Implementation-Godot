@@ -46,12 +46,11 @@ func track_target(state : bool):
 	tracking = state
 	if tracking:
 		for child in get_node("Seekers").get_children():
-			if !child.tracking:
+			if !child.is_tracking():
 				child.start_tracking(target)
 	else:
 		for child in get_node("Seekers").get_children():
-			child.tracking = false
-			child.following_path = false
+			child.stop_tracking()
 
 func clear_seekers():
 	for child in get_node("Seekers").get_children():

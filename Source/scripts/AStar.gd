@@ -3,9 +3,7 @@ extends Spatial
 export (int) var unwalkableMask = 7
 export (Vector2) var gridWorldSize
 export (float) var nodeRadius = 1
-# warning-ignore:unused_class_variable
 export (bool) var blurrWeights = false
-# warning-ignore:unused_class_variable
 export (int) var blurrKernelSize = 1
 
 export (bool) var create_visual_grid = false
@@ -82,8 +80,8 @@ func create_visual_indicator(position : Vector3, color : Color):
 	mesh_instance.set_surface_material(0, material)
 	mesh_instance.global_transform.origin = position
 
-func request_path(startPos : Vector3, targetPos : Vector3, callback : FuncRef):
-	path_finding_manager.request_path(PathRequest.new(startPos, targetPos, callback))
+func request_path(requester_path : NodePath, startPos : Vector3, targetPos : Vector3, callback : FuncRef, unique_id : int):
+	path_finding_manager.request_path(PathRequest.new(requester_path, startPos, targetPos, callback, unique_id))
 
 func find_path(startPos : Vector3, targetPos : Vector3):
 	var waypoints : PoolVector3Array = []
@@ -101,7 +99,6 @@ func find_path(startPos : Vector3, targetPos : Vector3):
 		while openSet.size() > 0:
 			var currentNode : PathNode = openSet.remove_first()
 			closedSet.append(currentNode)
-			
 			if currentNode == targetNode:
 				path_success = true
 				break
@@ -123,7 +120,7 @@ func find_path(startPos : Vector3, targetPos : Vector3):
 		waypoints = retrace_path(startNode, targetNode)
 	
 	return [waypoints, path_success]
-	
+
 
 func retrace_path(startNode : PathNode, endNode : PathNode) -> PoolVector3Array:
 	var path_nodes : Array = []
@@ -137,6 +134,7 @@ func retrace_path(startNode : PathNode, endNode : PathNode) -> PoolVector3Array:
 	waypoints.invert()
 	return waypoints
 
+
 func simplify_path(path_nodes : Array) -> PoolVector3Array:
 	var waypoints : PoolVector3Array = []
 	var direction_old : Vector2 = Vector2.ZERO
@@ -146,7 +144,8 @@ func simplify_path(path_nodes : Array) -> PoolVector3Array:
 			waypoints.append(path_nodes[i].worldPosition + Vector3.UP)
 			direction_old = direction_new
 	return waypoints
-	
+
+
 func get_distance(nodeA : PathNode, nodeB : PathNode) -> int:
 	var distX : int = int(abs(nodeA.gridX - nodeB.gridX))
 	var distY : int = int(abs(nodeA.gridY - nodeB.gridY))
@@ -157,59 +156,98 @@ func get_distance(nodeA : PathNode, nodeB : PathNode) -> int:
 
 
 class PathRequestManager:
-	var path_request_queue : Array = []
+	var request_queue : Object
 	var pathfinding : Object
 	
 	var path_request_thread : Thread
 	var path_request_mutex : Mutex
 	
 	func _init(_pathfinding : Object):
+		request_queue = PathRequestQueue.new()
 		self.pathfinding = _pathfinding
-	
+
 	func request_path(path_request : PathRequest):
 		if path_request_thread == null:
 			path_request_thread = Thread.new()
 			path_request_mutex = Mutex.new()
 		path_request_mutex.lock()
-		path_request_queue.append(path_request)
+		request_queue.append(path_request)
 		path_request_mutex.unlock()
-		if path_request_queue.size() == 1:
-			# Only item in the list so start the task.
+		if request_queue.size() == 1:
 			call_deferred('path_data_defered')
         
 	func path_data_defered():
-		var error = path_request_thread.start(self, 'path_data_execute', path_request_queue[0])
+		var error = path_request_thread.start(self, 'path_data_execute', request_queue.front())
 		if error != 0:
 			print(error)
 	    
 	func path_data_execute(args):
+		# Don't calculate or pass if requester is gone/dead
+		if pathfinding.get_tree().get_root().has_node(args.requester_path) == null:
+			return
+		
+		var new_path_args = pathfinding.find_path(args.pathStart, args.pathEnd)
 		call_deferred('path_data_clean_up')
-		return args
+		return [args.callback, new_path_args, args.requester_path]
 	    
 	func path_data_clean_up():
 		var args = path_request_thread.wait_to_finish()
-		var new_path_args = pathfinding.find_path(args.pathStart, args.pathEnd)
+		args[0].call_func(args[1])
+		request_queue.pop_front()
 		
-		args.callback.call_func(new_path_args)
-		path_request_queue.pop_front()
-		
-		if path_request_queue.size() > 0:
+		if request_queue.size() > 0:
 			# Start the next task.
 			call_deferred('path_data_defered')
-		elif path_request_queue.size() == 0:
+		elif request_queue.size() == 0:
 			path_request_thread = null
 			path_request_mutex = null
 
 
+class PathRequestQueue:
+	var path_request_queue : Array = []
+
+	func append(request : PathRequest):
+		var index = find(request)
+		if index > 0:
+			replace(index, request)
+			return
+		path_request_queue.append(request)
+	
+	func find(request : PathRequest):
+		for i in range(size()-1, -1, -1):
+			if path_request_queue[i].unique_id == request.unique_id:
+				if path_request_queue[i].is_processing:
+					return -1
+				return i
+		return -1
+	
+	func replace(old_index : int, new_request : PathRequest):
+		path_request_queue[old_index] = new_request
+	
+	func size():
+		return path_request_queue.size()
+	
+	func pop_front():
+		path_request_queue.pop_front()
+	
+	func front():
+		return path_request_queue.front()
+
+
 class PathRequest:
+	var requester_path : NodePath
 	var pathStart : Vector3
 	var pathEnd : Vector3
 	var callback : FuncRef
+	var unique_id : int
+	var is_processing : bool = false
 
-	func _init(_start : Vector3, _end : Vector3, _callback : FuncRef):
+	func _init(_requester_path : NodePath, _start : Vector3, _end : Vector3, _callback : FuncRef, _unique_id : int):
+		self.requester_path = _requester_path
 		self.pathStart = _start
 		self.pathEnd = _end
 		self.callback = _callback
+		self.unique_id = _unique_id
 
 
 class Grid:
@@ -279,10 +317,8 @@ class Grid:
 					# convert back from base 0 to base 1
 					if walkableRegionDictionary.has(layer+1):
 						movement_penalty = walkableRegionDictionary[layer+1]
-#					print(movement_penalty)
-#				else:
-#					grid[x][y] = null
-#					continue
+				else:
+					walkable = false
 				if !walkable:
 					movement_penalty += obstacleProximityPenalty
 				
@@ -333,17 +369,11 @@ class Grid:
 		for y in range(gridSizeY):
 			for x in range(-kernel_extents, kernel_extents + 1 + 1):
 				var sampleX : int = int(clamp(x, 0, kernel_extents))
-#				var grid_val = grid[sampleX][y]
-#				penalties_horizontal_pass[0][y] += edgePenalty if grid_val == null else grid_val.movement_penalty
 				penalties_horizontal_pass[0][y] += grid[sampleX][y].movement_penalty
-			
 			
 			for x in range(1, gridSizeX):
 				var removeIndex : int = int(clamp(x - kernel_extents - 1, 0, gridSizeX))
 				var addIndex : int = int(clamp(x + kernel_extents, 0, gridSizeX - 1))
-#				var grid_val_1 = grid[removeIndex][y]
-#				var grid_val_2 = grid[addIndex][y]
-#				penalties_horizontal_pass[x][y] = penalties_horizontal_pass[x-1][y]  - (edgePenalty if grid_val_1 == null else grid_val_1.movement_penalty) + (edgePenalty if grid_val_2 == null else grid_val_2.movement_penalty)
 				penalties_horizontal_pass[x][y] = penalties_horizontal_pass[x-1][y]  - grid[removeIndex][y].movement_penalty + grid[addIndex][y].movement_penalty
 	
 		for x in range(gridSizeX):
@@ -352,7 +382,6 @@ class Grid:
 				penalties_vertical_pass[x][0] += penalties_horizontal_pass[x][sampleY]
 			
 			var blurred_penalty : int = int(round(penalties_vertical_pass[x][0]  / float(kernel_size * kernel_size)))
-#			if grid[x][0] != null:
 			grid[x][0].movement_penalty = blurred_penalty
 			
 			for y in range(1, gridSizeY):
@@ -361,7 +390,6 @@ class Grid:
 			
 				penalties_vertical_pass[x][y] = penalties_vertical_pass[x][y-1]  - penalties_horizontal_pass[x][removeIndex] + penalties_horizontal_pass[x][addIndex]
 				blurred_penalty = int(round(penalties_vertical_pass[x][y]  / float(kernel_size * kernel_size)))
-#				if grid[x][y] != null:
 				grid[x][y].movement_penalty = blurred_penalty
 				
 				if blurred_penalty > penaltyMax:
@@ -441,14 +469,12 @@ class Line:
 
 
 class SmoothPath:
-	var parent : Object
 	var lookPoints : PoolVector3Array = []
 	var turnBoundaries : Array = []
 	var finishLineIndex : int
 	var slowDownIndex : int
 	
-	func _init(_parent : Object, waypoints : PoolVector3Array, start_pos : Vector3, _draw_path : Array, turn_dist : float, stopping_dist : float):
-		self.parent = _parent
+	func _init(waypoints : PoolVector3Array, start_pos : Vector3, _draw_path : Array, turn_dist : float, stopping_dist : float):
 		lookPoints = waypoints
 		turnBoundaries.resize(lookPoints.size())
 		finishLineIndex = turnBoundaries.size() - 1
@@ -514,6 +540,7 @@ class PathNode:
 		else:
 			return comparison
 
+
 class Heap:
 	var heap_item_dict : Dictionary
 	var items : Array
@@ -530,14 +557,19 @@ class Heap:
 		if currentItemCount >= items.size():		# NOT OPTIMAL - FIX
 			items.resize(int(currentItemCount*1.25))
 		items[currentItemCount] = heap_item
+#		items.replace(currentItemCount, heap_item)
 		currentItemCount += 1
 		sort_up(heap_item)
 	
 	func remove_first() -> Object:
 		var firstItem : Heap_Item = items[0]
+#		var firstItem : Heap_Item = items.get_item(0)
 		currentItemCount-= 1
 		items[0] = items[currentItemCount]
+#		items.replace(0, items.get_item(currentItemCount))
 		items[0].heapIndex = 0
+#		items.get_item(0).heapIndex = 0
+#		sort_down(items.get_item(0))
 		sort_down(items[0])
 		
 		# warning-ignore:return_value_discarded
@@ -545,6 +577,9 @@ class Heap:
 		return firstItem.item
 	
 	func find(item : Object) -> Heap_Item:
+#		var found_item = items.find(item)
+#		if found_item:
+#			return found_item
 		if heap_item_dict.has(item.worldPosition):
 			return heap_item_dict[item.worldPosition]
 		else:
@@ -562,7 +597,8 @@ class Heap:
 			return false
 		if size() <= item.heapIndex:
 			return false
-		return items[item.heapIndex].item ==  item
+		return items[item.heapIndex].item == item
+#		return items.get_item(item.heapIndex).item == item
 	
 	func sort_down(item : Heap_Item):
 		while(true):
@@ -573,10 +609,13 @@ class Heap:
 				swapIndex = childIndexLeft
 				if childIndexRight < size():
 					if items[childIndexLeft].compare_to(items[childIndexRight]) < 0:
+#					if items.get_item(childIndexLeft).compare_to(items.get_item(childIndexRight)) < 0:
 						swapIndex = childIndexRight
 				
 				if item.compare_to(items[swapIndex]) < 0:
+#				if item.compare_to(items.get_item(swapIndex)) < 0:
 					swap(item, items[swapIndex])
+#					swap(item, items.get_item(swapIndex))
 				else:
 					return
 			else:
@@ -586,7 +625,9 @@ class Heap:
 		var parentIndex : int = int((item.heapIndex-1)/2.0)
 		while (true):
 			if parentIndex > 0 and item.compare_to(items[parentIndex]) > 0:
+#			if parentIndex > 0 and item.compare_to(items.get_item(parentIndex)) > 0:
 				swap(item, items[parentIndex])
+#				swap(item, items.get_item(parentIndex))
 			else:
 				break
 			parentIndex = int((item.heapIndex-1)/2.0)
@@ -594,9 +635,34 @@ class Heap:
 	func swap(itemA : Heap_Item, itemB : Heap_Item):
 		items[itemA.heapIndex] = itemB
 		items[itemB.heapIndex] = itemA
+#		items.replace(itemA.heapIndex, itemB)
+#		items.replace(itemB.heapIndex, itemA)
 		var itemAIndex : int = itemA.heapIndex
 		itemA.heapIndex =  itemB.heapIndex
 		itemB.heapIndex = itemAIndex
+	
+	
+	class Heap_Array:
+		var items : Array
+		
+		func resize(new_size : int) -> void:
+			items.resize(new_size)
+		
+		func size() -> int:
+			return items.size()
+		
+		func find(item : Object) -> Heap_Item:
+			for x in items:
+				if x.unique_id == item.unique_id:
+					return x
+			return null
+		
+		func replace(index : int, new_item : Heap_Item) -> void:
+			print("replace at " + str(index) + "\t" + str(new_item))
+			items[index] = new_item
+		
+		func get_item(index : int) -> Heap_Item:
+			return items[index]
 	
 	class Heap_Item:
 		var heapIndex : int
