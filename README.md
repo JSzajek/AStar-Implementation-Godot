@@ -21,6 +21,7 @@ This was done in an attempt to improve upon the current Godot game engine's 3d p
 - [ ] Visualize smooth path as curve 
 - [ ] Add Additional Environments
 - [ ] Implement Jump Point Search w/ weights
+- [ ] Implement Path Request results caching and relavent storing
 
 #### Detailed Description ####
 The main scence demonstrates these key features within only a few steps. 
