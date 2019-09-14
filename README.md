@@ -21,7 +21,10 @@ This was done in an attempt to improve upon the current Godot game engine's 3d p
 - [ ] Visualize smooth path as curve 
 
 #### Detailed Description ####
-The main scence demonstrates these key features within only a few steps. First being the baking of the grid-node map with any user set parameters, which then displays its bake-time. Second spawning in as many "seekers/trackers" into the scene that will track the target which is represented by the red dot. Target can be moved around the scene by clicking any valid position. 
+The main scence demonstrates these key features within only a few steps. 
+1. The baking of the grid-node map with any user set parameters, which then displays its bake-time. 
+2. Spawning in as many "seekers/trackers" into the scene that will track the target which is represented by the red dot. 
+3. Target can be moved around the scene by clicking any valid position. 
 
 #### Included ####
 * Primary Scripts, Assets, Scenes
