@@ -19,6 +19,8 @@ This was done in an attempt to improve upon the current Godot game engine's 3d p
 - [x] Fix slowdown after close distance
 - [ ] Move path following into Astar script
 - [ ] Visualize smooth path as curve 
+- [ ] Add Additional Environments
+- [ ] Implement Jump Point Search w/ weights
 
 #### Detailed Description ####
 The main scence demonstrates these key features within only a few steps. 
